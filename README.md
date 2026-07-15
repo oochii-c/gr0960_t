@@ -8,52 +8,51 @@
 
 ```
 03/
+├─ api/
+│  └─ chat.js         # ✅ 배포용 백엔드 (Vercel 서버리스 함수 → /api/chat)
 ├─ client/            # 프론트엔드 (정적 파일)
 │  ├─ index.html      # 입력창 + 응답 표시
-│  └─ app.js          # 서버로 질문 전송 (fetch)
-└─ server/            # 백엔드 (Express 프록시)
-   ├─ index.js        # /api/chat 엔드포인트
-   ├─ package.json
-   └─ .env.example    # 키 템플릿 (.env는 커밋 안 됨)
+│  └─ app.js          # 서버로 질문 전송 (fetch '/api/chat')
+├─ server/            # (참고용) 예전 standalone Express 버전
+│  ├─ index.js
+│  ├─ package.json
+│  └─ .env.example    # 키 템플릿 (.env는 커밋 안 됨)
+└─ vercel.json        # client/를 루트(/)로 서빙, /api/*는 함수로
 ```
+
+> 핵심: 프론트와 백엔드가 **같은 주소**에 배포되므로 `app.js`는 `/api/chat`(상대경로)만 호출합니다. 그래서 CORS 설정이 필요 없습니다.
 
 ## 필요 환경
 
 - Node.js **18 이상** (내장 `fetch` 사용)
+- [Vercel CLI](https://vercel.com/docs/cli) (`npm i -g vercel`)
 
-## 실행 방법
-
-### 1. 서버 실행
-
-```bash
-cd server
-npm install
-
-# .env 파일 생성 후 실제 키 입력
-cp .env.example .env
-# .env 안의 GROQ_API_KEY 값을 본인 키로 교체
-```
-
-`.env` 예시:
-
-```
-GROQ_API_KEY=gsk_본인_키
-```
-
-서버 시작:
+## 로컬 실행 (`vercel dev`)
 
 ```bash
-npm start
+# 1) 키를 환경변수로 등록 (배포 프로젝트에도 동일하게 필요)
+vercel env add GROQ_API_KEY
+# 2) 등록한 키를 로컬로 내려받기
+vercel env pull
+# 3) 프론트 + /api 함수를 한 번에 로컬 서빙
+vercel dev
 # http://localhost:3000 에서 대기
 ```
 
+브라우저로 `http://localhost:3000` 을 열고, 입력창에 질문을 적어 **보내기**(또는 Enter).
+
 > 💡 키가 없어도 서버는 죽지 않고 `(mock) ...` 형태의 가짜 답을 돌려줍니다.
 
-### 2. 화면 열기
+## 배포 (Vercel)
 
-`client/index.html`을 브라우저로 열면 됩니다. (또는 Live Server 등으로 서빙)
+```bash
+# 03 폴더(루트)에서 실행
+vercel                       # 프로젝트 링크/설정 (최초 1회)
+vercel env add GROQ_API_KEY  # Production 환경에 키 등록
+vercel --prod                # 프로덕션 배포
+```
 
-입력창에 질문을 적고 **보내기** 버튼(또는 Enter)을 누르면 응답이 표시됩니다.
+배포 후 나오는 URL에서 바로 챗봇이 동작합니다.
 
 ## API
 
