@@ -1,0 +1,18 @@
+# dependencies
+node_modules/
+
+# secrets
+.env
+.env.*
+!.env.example
+
+# vercel
+.vercel
+
+# logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
